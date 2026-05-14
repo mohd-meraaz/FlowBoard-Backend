@@ -1,0 +1,73 @@
+server:
+  port: 8083
+spring:
+  config:
+    import: optional:file:.env[.properties],optional:file:../.env[.properties]
+
+  application:
+    name: board-service
+  datasource:
+    url: ${BOARD_DB_URL:jdbc:mysql://localhost:3306/flowboard_board}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    ip-address: ${EUREKA_INSTANCE_IP:127.0.0.1}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:127.0.0.1}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+    display-request-duration: true
+  show-actuator: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+services:
+  workspace:
+    base-url: ${WORKSPACE_SERVICE_BASE_URL:http://localhost:8082/api/v1/workspaces}
+  auth:
+    base-url: ${AUTH_SERVICE_BASE_URL:http://localhost:8080/api/v1/auth}
+  list:
+    base-url: ${LIST_SERVICE_BASE_URL:http://localhost:8084/api/v1/lists}
+  card:
+    base-url: ${CARD_SERVICE_BASE_URL:http://localhost:8085/api/v1/cards}
+
+frontend:
+  base-url: ${FRONTEND_BASE_URL:http://localhost:4200}
