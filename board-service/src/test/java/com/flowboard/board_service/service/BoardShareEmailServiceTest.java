@@ -14,7 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -108,16 +108,16 @@ class BoardShareEmailServiceTest {
     }
 
     @Test
-    @DisplayName("Handle MailSender exceptions gracefully without crashing")
-    void sendBoardInviteEmail_MailException_HandledGracefully() {
+    @DisplayName("Throw when MailSender fails")
+    void sendBoardInviteEmail_MailException_ThrowsCustomException() {
         // Arrange
         doThrow(new RuntimeException("SMTP Server Down")).when(mailSender).send(any(SimpleMailMessage.class));
 
         // Act & Assert
-        // The service wraps the send call in a try/catch, so this should NOT throw an exception outward
-        assertDoesNotThrow(() ->
-                emailService.sendBoardInviteEmail("test@test.com", "Bob", "Board", "/link", true)
-        );
+        assertThatThrownBy(() ->
+                emailService.sendBoardInviteEmail("test@test.com", "Bob", "Board", "/link", true))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Failed to send board invite email");
 
         verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
     }

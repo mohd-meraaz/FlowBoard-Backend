@@ -37,7 +37,7 @@ public class OAuth2SucceessHandler implements AuthenticationSuccessHandler {
                 user.getEmail(), user.getId(), user.getRole().name());
 
         log.info("OAuth2 login success: email={} userId={}", email, user.getId());
-        String frontendUrl = "http://localhost:4200/oauth2/callback?token=" + token
+        String frontendUrl = "http://18.208.84.37/oauth2/callback?token=" + token
                 + "&userId=" + user.getId()
                 + "&role=" + user.getRole().name();
 

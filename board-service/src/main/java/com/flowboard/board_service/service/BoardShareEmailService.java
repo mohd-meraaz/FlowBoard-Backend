@@ -1,11 +1,12 @@
 package com.flowboard.board_service.service;
 
+import com.flowboard.board_service.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +22,6 @@ public class BoardShareEmailService {
     @Value("${frontend.base-url:http://localhost:4200}")
     private String frontendBaseUrl;
 
-    @Async
     public void sendBoardInviteEmail(String toEmail,
                                      String inviterName,
                                      String boardName,
@@ -43,6 +43,10 @@ public class BoardShareEmailService {
             mailSender.send(mail);
         } catch (Exception ex) {
             log.error("Failed to send board invite email to {}: {}", toEmail, ex.getMessage(), ex);
+            throw new CustomException(
+                    "Failed to send board invite email to " + toEmail,
+                    HttpStatus.BAD_GATEWAY
+            );
         }
     }
 

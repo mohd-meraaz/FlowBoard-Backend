@@ -281,6 +281,31 @@ class BoardServiceImplTest {
         }
 
         @Test
+        @DisplayName("Share board by email - Fails when invite email cannot be sent")
+        void shareBoardByEmail_EmailFailure_ThrowsException() {
+            mockAdminAccess(creatorId);
+            testBoard.setVisibility(Visibility.PRIVATE);
+
+            ShareBoardByEmailRequest req = new ShareBoardByEmailRequest();
+            req.setEmails(List.of("user1@test.com"));
+
+            AuthLookupClient.AuthUserDto creator = mock(AuthLookupClient.AuthUserDto.class);
+            when(creator.getFullName()).thenReturn("Creator Name");
+            when(authLookupClient.findUserById(creatorId, authHeader)).thenReturn(Optional.of(creator));
+            when(authLookupClient.findUserByEmail(anyString(), anyString())).thenReturn(Optional.empty());
+            when(boardShareAccessRepository.existsByBoardIdAndEmailIgnoreCase(eq(boardId), anyString())).thenReturn(false);
+            doThrow(new CustomException("Failed to send board invite email to user1@test.com", org.springframework.http.HttpStatus.BAD_GATEWAY))
+                    .when(boardShareEmailService)
+                    .sendBoardInviteEmail(anyString(), anyString(), anyString(), anyString(), anyBoolean());
+
+            assertThatThrownBy(() -> boardService.shareBoardByEmail(boardId, req, creatorId, authHeader))
+                    .isInstanceOf(CustomException.class)
+                    .hasMessageContaining("Failed to send board invite email");
+
+            verify(boardShareEmailService).sendBoardInviteEmail(anyString(), anyString(), anyString(), anyString(), anyBoolean());
+        }
+
+        @Test
         @DisplayName("Get public board by token - Validates visibility")
         void getPublicBoardByToken_Success() {
             testBoard.setVisibility(Visibility.PUBLIC);
